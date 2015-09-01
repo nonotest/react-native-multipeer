@@ -191,7 +191,7 @@ RCT_EXPORT_METHOD(disconnect:(RCTResponseSenderBlock)callback) {
   
   [self.bridge.eventDispatcher sendDeviceEventWithName:@"RCTMultipeerConnectivityDataReceived"
                                body:@{
-                                 @"sender": @{
+                                 @"peer": @{
                                    @"id": peerID.displayName
                                  },
                                  @"data": parsedJSON
