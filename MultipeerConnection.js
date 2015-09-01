@@ -60,7 +60,7 @@ class MultipeerConnection extends EventEmitter {
     var invited = DeviceEventEmitter.addListener(
       'RCTMultipeerConnectivityInviteReceived',
       ((event) => {
-        event.sender = this._peers[event.sender.id];
+        event.sender = this._peers[event.peer.id];
         this.emit('invite', event);
       }).bind(this));
       
