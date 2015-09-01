@@ -7,6 +7,7 @@ var Peer = require('./Peer');
 class MultipeerConnection extends EventEmitter {
   
   constructor() {
+    super();
     this._peers = {};
     this._connectedPeers = {};
     var peerFound = DeviceEventEmitter.addListener(
