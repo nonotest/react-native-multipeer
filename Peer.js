@@ -1,10 +1,10 @@
 var EventEmitter = require('events').EventEmitter;
 
 class Peer extends EventEmitter {
-  constructor(id, name) {
+  constructor(id, info) {
     super();
     this.id = id;
-    this.name = name;
+    this.info = info;
   }
 }
 

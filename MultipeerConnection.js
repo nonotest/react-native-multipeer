@@ -14,7 +14,7 @@ class MultipeerConnection extends EventEmitter {
       'RCTMultipeerConnectivityPeerFound',
       ((event) => {
 console.log('RCTMultipeerConnectivityPeerFound', event);
-        var peer = new Peer(event.peer.id, event.peer.info.name);
+        var peer = new Peer(event.peer.id, event.peer.info);
         this._peers[peer.id] = peer;
         this.emit('peerFound', { peer });
       }).bind(this));
