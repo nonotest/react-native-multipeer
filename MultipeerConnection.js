@@ -1,5 +1,8 @@
 var React = require('react-native');
-var { DeviceEventEmitter, NativeModules } = React;
+var {
+  DeviceEventEmitter,
+  NativeModules
+} = React;
 var EventEmitter = require('events').EventEmitter;
 var RCTMultipeerConnectivity = NativeModules.MultipeerConnectivity;
 var Peer = require('./Peer');
@@ -16,7 +19,9 @@ class MultipeerConnection extends EventEmitter {
         console.log('RCTMultipeerConnectivityPeerFound', event);
         var peer = new Peer(event.peer.id, event.peer.info);
         this._peers[peer.id] = peer;
-        this.emit('peerFound', { peer });
+        this.emit('peerFound', {
+          peer
+        });
       }).bind(this));
 
     var peerLost = DeviceEventEmitter.addListener(
@@ -25,7 +30,11 @@ class MultipeerConnection extends EventEmitter {
         console.log('RCTMultipeerConnectivityPeerLost', event);
         var peer = this._peers[event.peer.id];
         peer && peer.emit('lost');
-        peer && this.emit('peerLost', { peer: { id: peer.id } });
+        peer && this.emit('peerLost', {
+          peer: {
+            id: peer.id
+          }
+        });
         delete this._peers[event.peer.id];
         delete this._connectedPeers[event.peer.id];
       }).bind(this));
@@ -110,7 +119,7 @@ class MultipeerConnection extends EventEmitter {
 
   send(recipients, data, callback) {
     if (!callback) {
-      callback = () => { };
+      callback = () => {};
     }
 
     var recipientIds = recipients.map((recipient) => {
@@ -125,21 +134,21 @@ class MultipeerConnection extends EventEmitter {
 
   broadcast(data, callback) {
     if (!callback) {
-      callback = () => { };
+      callback = () => {};
     }
     RCTMultipeerConnectivity.broadcast(data, callback);
   }
 
   invite(peerId, callback) {
     if (!callback) {
-      callback = () => { };
+      callback = () => {};
     }
     RCTMultipeerConnectivity.invite(peerId, callback);
   }
 
   rsvp(inviteId, accept, callback) {
     if (!callback) {
-      callback = () => { };
+      callback = () => {};
     }
     RCTMultipeerConnectivity.rsvp(inviteId, accept, callback);
   }
@@ -150,6 +159,14 @@ class MultipeerConnection extends EventEmitter {
 
   browse(channel) {
     RCTMultipeerConnectivity.browse(channel);
+  }
+
+  endAdvertise() {
+    RCTMultipeerConnectivity.endAdvertise();
+  }
+
+  endBrowse() {
+    RCTMultipeerConnectivity.endBrowse();
   }
 
   //  createStreamForPeer(peerId, name, callback) {

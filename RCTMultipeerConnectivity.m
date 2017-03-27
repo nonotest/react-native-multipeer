@@ -16,11 +16,20 @@ RCT_EXPORT_METHOD(advertise:(NSString *)channel data:(NSDictionary *)data) {
   [self.advertiser startAdvertisingPeer];
 }
 
+RCT_EXPORT_METHOD(endAdvertise) {
+  [self.advertiser stopAdvertisingPeer];
+}
+
 RCT_EXPORT_METHOD(browse:(NSString *)channel)
 {
   self.browser = [[MCNearbyServiceBrowser alloc] initWithPeer:self.peerID serviceType:channel];
   self.browser.delegate = self;
   [self.browser startBrowsingForPeers];
+}
+
+RCT_EXPORT_METHOD(endBrowse)
+{
+  [self.browser stopBrowsingForPeers];
 }
 
 RCT_EXPORT_METHOD(invite:(NSString *)peerUUID callback:(RCTResponseSenderBlock)callback) {
