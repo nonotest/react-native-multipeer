@@ -52,7 +52,7 @@ RCT_EXPORT_METHOD(broadcast:(NSDictionary *)data forwardEnabled:(BOOL)forwardEna
 RCT_EXPORT_METHOD(send:(NSArray *)recipients data:(NSDictionary *)data forwardEnabled:(BOOL)forwardEnabled callback:(RCTResponseSenderBlock)callback) {
     NSMutableArray *peers = [NSMutableArray array];
     for (NSString *peerUUID in recipients) {
-        [peers addObject:[self.peers valueForKey:peerUUID]];
+        [peers addObject:[self.peerIDs valueForKey:peerUUID]];
     }
     
     [self sendData:peers data:data forwardEnabled:forwardEnabled callback:callback];
@@ -123,6 +123,7 @@ RCT_EXPORT_METHOD(getAllPeers:(RCTResponseSenderBlock)callback) {
     NSMutableDictionary *dataToSend = [data mutableCopy];
     if (forwardEnabled) {
         NSMutableArray *peerIDs = [NSMutableArray array];
+        [peerIDs addObject:self.peerID.displayName];
         for (MCPeerID *peerID in peers) {
             [peerIDs addObject:peerID.displayName];
             
@@ -131,6 +132,7 @@ RCT_EXPORT_METHOD(getAllPeers:(RCTResponseSenderBlock)callback) {
         NSLog(@"[Info] sendData forwardEnabled %@", peerIDs);
     }
     
+    NSLog(@"[Info] sendData to %@ %@", data, peers);
     NSError *error = nil;
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:dataToSend options:0 error:&error];
     [self.session sendData:jsonData toPeers:peers withMode:MCSessionSendDataReliable error:&error];
@@ -140,6 +142,23 @@ RCT_EXPORT_METHOD(getAllPeers:(RCTResponseSenderBlock)callback) {
     else {
         callback(@[[error description]]);
     }
+}
+
+- (void)sendData:(NSArray *)peers data:(NSDictionary *)data forwardEnabled:(BOOL)forwardEnabled {
+    NSMutableDictionary *dataToSend = [data mutableCopy];
+    if (forwardEnabled) {
+        NSMutableArray *peerIDs = [[NSMutableArray alloc] initWithArray:[dataToSend objectForKey:@"_forwardRecepients"] copyItems:YES];
+        for (MCPeerID *peerID in peers) {
+            [peerIDs addObject:peerID.displayName];
+            
+            [dataToSend setValue:peerIDs forKey:@"_forwardRecepients"];
+        }
+        NSLog(@"[Info] sendData (forwarding) forwardEnabled %@", peerIDs);
+    }
+    
+    NSError *error = nil;
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:dataToSend options:0 error:&error];
+    [self.session sendData:jsonData toPeers:peers withMode:MCSessionSendDataReliable error:&error];
 }
 
 - (void)browser:(MCNearbyServiceBrowser *)browser foundPeer:(MCPeerID *)peerID withDiscoveryInfo:(NSDictionary *)info {
@@ -268,9 +287,24 @@ RCT_EXPORT_METHOD(getAllPeers:(RCTResponseSenderBlock)callback) {
     if([object isKindOfClass:[NSDictionary class]]) {
         parsedJSON = object;
     }
-    
-    if ([parsedJSON objectForKey:@"_forwardRecepients"]) {
-        NSLog(@"[Info] didReceiveData with forwardEnabled %@", [parsedJSON objectForKey:@"_forwardRecepients"]);
+
+    NSArray *forwardRecipients = [parsedJSON objectForKey:@"_forwardRecepients"];
+    if (forwardRecipients) {
+        NSLog(@"[Info] didReceiveData with forwardEnabled %@", forwardRecipients);
+        
+        NSMutableArray *forwardTo = [NSMutableArray array];
+        for (MCPeerID *peerID in [self.session connectedPeers]) {
+            NSLog(@"[Info] valuecheck %@ %@", peerID.displayName, ![forwardRecipients containsObject:peerID.displayName] ? @"add" : @"skip");
+            if (![forwardRecipients containsObject:peerID.displayName]) {
+                NSLog(@"[Info] valuecheck adding forward %@", peerID.displayName);
+                [forwardTo addObject:peerID];
+            }
+        }
+        
+        if ([forwardTo count]) {
+            NSLog(@"[Info] didReceiveData valuecheck more peers exist %@", forwardTo);
+            [self sendData:forwardTo data:parsedJSON forwardEnabled:YES];
+        }
     }
     
     [self.bridge.eventDispatcher sendDeviceEventWithName:@"RCTMultipeerConnectivityDataReceived"
