@@ -110,10 +110,10 @@ class MultipeerConnection extends EventEmitter {
     RCTMultipeerConnectivity.getConnectedPeers(callback);
   }
 
-  send(recipients, data, callback) {
+  send(recipients, data, callback, forwardEnabled = false) {
     console.log('RCTMultipeer', 'send');
     if (!callback) {
-      callback = () => {};
+      callback = () => { };
     }
 
     var recipientIds = recipients.map((recipient) => {
@@ -123,21 +123,21 @@ class MultipeerConnection extends EventEmitter {
       return recipient;
     });
 
-    RCTMultipeerConnectivity.send(recipientIds, data, callback);
+    RCTMultipeerConnectivity.send(recipientIds, data, forwardEnabled, callback);
   }
 
-  broadcast(data, callback) {
+  broadcast(data, callback, forwardEnabled = false) {
     console.log('RCTMultipeer', 'broadcast');
     if (!callback) {
-      callback = () => {};
+      callback = () => { };
     }
-    RCTMultipeerConnectivity.broadcast(data, callback);
+    RCTMultipeerConnectivity.broadcast(data, forwardEnabled, callback);
   }
 
   invite(peerId, callback) {
     console.log('RCTMultipeer', 'invite', peerId);
     if (!callback) {
-      callback = () => {};
+      callback = () => { };
     }
     RCTMultipeerConnectivity.invite(peerId, callback);
   }
@@ -145,7 +145,7 @@ class MultipeerConnection extends EventEmitter {
   rsvp(inviteId, accept, callback) {
     console.log('RCTMultipeer', 'rsvp', inviteId, accept);
     if (!callback) {
-      callback = () => {};
+      callback = () => { };
     }
     RCTMultipeerConnectivity.rsvp(inviteId, accept, callback);
   }
