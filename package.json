@@ -1,8 +1,8 @@
 {
   "name": "react-native-multipeer",
   "version": "0.2.1",
-  "license": "",
-  "homepage": "",
+  "license": "MIT",
+  "homepage": "https://github.com/lwansbrough/react-native-multipeer",
   "repository": {
     "type" : "git",
     "url" : "https://github.com/lwansbrough/react-native-multipeer.git"
